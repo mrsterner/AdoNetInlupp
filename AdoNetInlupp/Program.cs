@@ -11,8 +11,9 @@ class Program
         {
             Console.WriteLine();
             Console.WriteLine("1. List movies by genre");
-            Console.WriteLine("2. Add a movie");
-            Console.WriteLine("3. Delete a movie");
+            Console.WriteLine("2. List all movies");
+            Console.WriteLine("3. Add a movie");
+            Console.WriteLine("4. Delete a movie");
             Console.WriteLine("0. Exit");
             Console.Write("Choose: ");
 
@@ -22,9 +23,12 @@ class Program
                     ListMoviesByGenre();
                     break;
                 case "2":
-                    AddMovie();
+                    PrintMovies();
                     break;
                 case "3":
+                    AddMovie();
+                    break;
+                case "4":
                     DeleteMovie();
                     break;
                 case "0":
@@ -47,11 +51,23 @@ class Program
     
     static void PrintMovies()
     {
-        Console.WriteLine("Available Movies:");
-        foreach (var movie in Movie.GetAllMovies())
+        var movies = Movie.GetAllMovies();
+
+        var idWidth = Math.Max("Id".Length, movies.Max(m => m.Id.ToString().Length));
+        var titleWidth = Math.Max("Title".Length, movies.Max(m => m.Title.Length));
+
+        Console.WriteLine();
+        Console.WriteLine($"{"Id".PadLeft(idWidth)}  {"Title".PadRight(titleWidth)}  Year  Genre");
+        Console.WriteLine(new string('-', idWidth + titleWidth + 24));
+
+        foreach (var movie in movies)
         {
-            Console.WriteLine(movie);
+            var id = movie.Id.ToString().PadLeft(idWidth);
+            var title = movie.Title.PadRight(titleWidth);
+            Console.WriteLine($"{id}  {title}  {movie.ReleaseYear}  {movie.GenreName}");
         }
+
+        Console.WriteLine();
     }
 
     static void ListMoviesByGenre()
@@ -123,23 +139,28 @@ class Program
     {
         PrintMovies();
         Console.Write("Id: ");
-        var title = Console.ReadLine();
 
-        if (int.TryParse(title, out var res))
+        if (!int.TryParse(Console.ReadLine(), out var id))
         {
-            var name = Movie.GetAllMovies().Select(l => l.Id == res);
-            if (Movie.DeleteMovie(res))
-            {
-                Console.WriteLine($"Deleted {name}.");
-            }
-            else
-            {
-                Console.WriteLine("No such movie, movie not deleted.");
-            }
+            Console.WriteLine("Id must be a number.");
+            return;
+        }
+
+        var movie = Movie.GetAllMovies().FirstOrDefault(m => m.Id == id);
+
+        if (movie == null)
+        {
+            Console.WriteLine("No such movie, movie not deleted.");
+            return;
+        }
+
+        if (Movie.DeleteMovie(id))
+        {
+            Console.WriteLine($"Deleted {movie}.");
         }
         else
         {
-            Console.WriteLine("Title cannot be empty.");
+            Console.WriteLine("Movie could not be deleted.");
         }
     }
 }

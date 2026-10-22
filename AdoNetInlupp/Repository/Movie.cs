@@ -6,6 +6,11 @@ namespace AdoNetInlupp.Repository;
 public record Movie(int Id, string Title, int ReleaseYear, string GenreName)
 {
     
+    public override string ToString()
+    {
+        return $"{Title} ({ReleaseYear}) - {GenreName}";
+    }
+    
     private static string ConnectionString =>
         new SqlConnectionStringBuilder
         {
