@@ -12,6 +12,7 @@ class Program
             Console.WriteLine();
             Console.WriteLine("1. List movies by genre");
             Console.WriteLine("2. Add a movie");
+            Console.WriteLine("3. Delete a movie");
             Console.WriteLine("0. Exit");
             Console.Write("Choose: ");
 
@@ -22,6 +23,9 @@ class Program
                     break;
                 case "2":
                     AddMovie();
+                    break;
+                case "3":
+                    DeleteMovie();
                     break;
                 case "0":
                     return;
@@ -38,6 +42,15 @@ class Program
         foreach (var genre in Movie.GetAllGenres())
         {
             Console.WriteLine(genre);
+        }
+    }
+    
+    static void PrintMovies()
+    {
+        Console.WriteLine("Available Movies:");
+        foreach (var movie in Movie.GetAllMovies())
+        {
+            Console.WriteLine(movie);
         }
     }
 
@@ -103,6 +116,30 @@ class Program
         else
         {
             Console.WriteLine("No such genre, movie not added.");
+        }
+    }
+    
+    static void DeleteMovie()
+    {
+        PrintMovies();
+        Console.Write("Id: ");
+        var title = Console.ReadLine();
+
+        if (int.TryParse(title, out var res))
+        {
+            var name = Movie.GetAllMovies().Select(l => l.Id == res);
+            if (Movie.DeleteMovie(res))
+            {
+                Console.WriteLine($"Deleted {name}.");
+            }
+            else
+            {
+                Console.WriteLine("No such movie, movie not deleted.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Title cannot be empty.");
         }
     }
 }

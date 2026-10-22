@@ -34,22 +34,31 @@ public record Movie(int Id, string Title, int ReleaseYear, string GenreName)
 
         return command.ExecuteNonQuery() > 0;
     }
+    
+    public static bool DeleteMovie(int movieId)
+    {
+        const string sql = "DELETE FROM Movie WHERE MovieId = @movieId";
 
-    public static List<Movie> GetAllMovies(string genreName)
+        using var connection = new SqlConnection(ConnectionString);
+        using var command = new SqlCommand(sql, connection);
+        command.Parameters.Add("@movieId", SqlDbType.Int).Value = movieId;
+        connection.Open();
+
+        return command.ExecuteNonQuery() > 0;
+    }
+
+    public static List<Movie> GetAllMovies()
     {
         const string sql = @"
             SELECT Movie.MovieId, Movie.Title, Movie.ReleaseYear, Genre.Name AS GenreName
             FROM Movie
             INNER JOIN Genre ON Genre.GenreId = Movie.GenreId
-            WHERE Genre.Name = @genreName
             ORDER BY Movie.Title";
 
         var movies = new List<Movie>();
 
         using var connection = new SqlConnection(ConnectionString);
         using var command = new SqlCommand(sql, connection);
-        command.Parameters.Add(
-            new SqlParameter("@genreName", SqlDbType.NVarChar, 50) { Value = genreName});
         connection.Open();
         using var reader = command.ExecuteReader();
 
@@ -65,19 +74,21 @@ public record Movie(int Id, string Title, int ReleaseYear, string GenreName)
         return movies;
     }
     
-    public static List<Movie> GetAllMoviesUnsafe(string genreName)
+    public static List<Movie> GetAllMovies(string genreName)
     {
-        var sql = @"
-        SELECT Movie.MovieId, Movie.Title, Movie.ReleaseYear, Genre.Name AS GenreName
-        FROM Movie
-        INNER JOIN Genre ON Genre.GenreId = Movie.GenreId
-        WHERE Genre.Name = '" + genreName + @"'
-        ORDER BY Movie.Title";
+        const string sql = @"
+            SELECT Movie.MovieId, Movie.Title, Movie.ReleaseYear, Genre.Name AS GenreName
+            FROM Movie
+            INNER JOIN Genre ON Genre.GenreId = Movie.GenreId
+            WHERE Genre.Name = @genreName
+            ORDER BY Movie.Title";
 
         var movies = new List<Movie>();
 
         using var connection = new SqlConnection(ConnectionString);
         using var command = new SqlCommand(sql, connection);
+        command.Parameters.Add(
+            new SqlParameter("@genreName", SqlDbType.NVarChar, 50) { Value = genreName});
         connection.Open();
         using var reader = command.ExecuteReader();
 
